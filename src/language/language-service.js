@@ -51,12 +51,23 @@ const LanguageService = {
         .increment('total_score', 1)
     }
   },
+  //increment M value funnction
+  incrementMValue(db, id, binary) {
+    //increment the M value of a word, 
+    //if right M = M * 2
+    //if wrong M = 1
+  },
   getCurrentWord(db, language_id) {
     return db
       .from('word')
       .select('id', 'original', 'translation')
       .where({ language_id })
-  }
+  },
+
+  // populatelinkedList(language, words) {
+  //   const ll = new LinkedList
+    
+  // }
 }
 
 module.exports = LanguageService

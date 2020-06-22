@@ -45,7 +45,7 @@ languageRouter
 
 languageRouter
   .get('/head', async (req, res, next) => {
-    // implement me
+    // try catch block
     const words = await LanguageService.getCurrentWord(
       req.app.get('db'), req.language.id
     )
@@ -55,20 +55,20 @@ languageRouter
 languageRouter
   .route('/guess')
   .post(jsonBodyParser, async (req, res, next) => {
-    // implement me
-    try {
-      // console.log(req.body.binary)
-      // console.log(req.body.id)
 
+    try {
+
+      const words = await LanguageService.getLanguageWords(req.app.get('db'), req.language.id)
+      //const ll = new linkedList
+      //
+      //
       const updatedWordScore = await LanguageService.incrementCorrectCount(req.app.get('db'), req.body.id, req.body.binary)
       const updatedTotalScore = await LanguageService.incrementTotalScore(req.app.get('db'), req.language.id, req.body.binary)
-      console.log('word score', updatedWordScore)
-      console.log('total score', updatedTotalScore)
-      console.log('binary', req.body.binary, 'id', req.body.id)
+
       res.json({ updatedWordScore, updatedTotalScore })
     }
-    catch{
-      (error) => next(error)
+    catch(error) {
+      next(error)
     }
   })
 

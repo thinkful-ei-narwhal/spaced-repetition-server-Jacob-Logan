@@ -10,6 +10,10 @@ const userRouter = require('./user/user-router')
 
 const app = express()
 
+//TODO: need a function to rearrange the words based on the M values
+
+
+
 app.use(morgan((NODE_ENV === 'production') ? 'tiny' : 'common', {
   skip: () => NODE_ENV === 'test',
 }))
