@@ -46,7 +46,10 @@ languageRouter
 languageRouter
   .get('/head', async (req, res, next) => {
     // implement me
-    res.send('implement me!')
+    const words = await LanguageService.getCurrentWord(
+      req.app.get('db'), req.language.id
+    )
+    res.json({ words })
   })
 
 languageRouter
@@ -56,10 +59,12 @@ languageRouter
     try {
       // console.log(req.body.binary)
       // console.log(req.body.id)
+
       const updatedWordScore = await LanguageService.incrementCorrectCount(req.app.get('db'), req.body.id, req.body.binary)
       const updatedTotalScore = await LanguageService.incrementTotalScore(req.app.get('db'), req.language.id, req.body.binary)
-      console.log(updatedWordScore)
-      console.log(updatedTotalScore)
+      console.log('word score', updatedWordScore)
+      console.log('total score', updatedTotalScore)
+      console.log('binary', req.body.binary, 'id', req.body.id)
       res.json({ updatedWordScore, updatedTotalScore })
     }
     catch{

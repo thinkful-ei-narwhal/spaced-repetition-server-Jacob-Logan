@@ -29,13 +29,13 @@ const LanguageService = {
       .where({ language_id })
   },
   incrementCorrectCount(db, id, binary) {
-    if (binary === '1') {
+    if (binary === 1) {
       return db
         .from('word')
         .where({ id })
         .increment('correct_count', 1)
     }
-    if (binary === '0') {
+    if (binary === 0) {
       return db
         .from('word')
         .where({ id })
@@ -43,12 +43,19 @@ const LanguageService = {
     }
   },
   incrementTotalScore(db, id, binary) {
-    if (binary === '1') {
+    if (binary === 1) {
+      console.log('binary === 1')
       return db
         .from('language')
         .where({ id })
         .increment('total_score', 1)
     }
+  },
+  getCurrentWord(db, language_id) {
+    return db
+      .from('word')
+      .select('id', 'original', 'translation')
+      .where({ language_id })
   }
 }
 
