@@ -49,7 +49,7 @@ languageRouter
       const words = await LanguageService.getHeadOfList(req.app.get('db'), req.language.id)
       res.send(words[0])
     }
-    catch(err) {
+    catch (err) {
       next(err)
     }
 
@@ -70,7 +70,7 @@ languageRouter
 
       res.json({ updatedWordScore, updatedTotalScore })
     }
-    catch(error) {
+    catch (error) {
       next(error)
     }
   })
