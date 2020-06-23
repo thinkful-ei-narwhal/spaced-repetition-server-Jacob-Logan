@@ -59,8 +59,15 @@ languageRouter
   .route('/guess')
   .post(jsonBodyParser, async (req, res, next) => {
 
-    try {
+    console.log(req.body)
 
+    for (const [key, value] of Object.entries(req.body)) {
+      console.log('value', value)
+      if (value !== 'guess') {
+        return res.status(400).json({ error: `Missing 'guess' in request body` })
+      }
+    }
+    try {
       const words = await LanguageService.getLanguageWords(req.app.get('db'), req.language.id)
       //const ll = new linkedList
       //
@@ -70,6 +77,7 @@ languageRouter
 
       res.json({ updatedWordScore, updatedTotalScore })
     }
+
     catch (error) {
       next(error)
     }
