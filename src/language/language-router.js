@@ -45,11 +45,14 @@ languageRouter
 
 languageRouter
   .get('/head', async (req, res, next) => {
-    // try catch block
-    const words = await LanguageService.getCurrentWord(
-      req.app.get('db'), req.language.id
-    )
-    res.json({ words })
+    try {
+      const words = await LanguageService.getHeadOfList(req.app.get('db'), req.language.id)
+      res.send(words[0])
+    }
+    catch(err) {
+      next(err)
+    }
+
   })
 
 languageRouter

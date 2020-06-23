@@ -64,6 +64,27 @@ const LanguageService = {
       .where({ language_id })
   },
 
+  getHeadOfList(db, language_id) {
+    return db
+    //get next = 2 of language_id = 1
+      // .from('word', 'language')
+      // .select('word.correct_count', 'word.incorrect_count', 'language.total_score')
+      // .where('next', 2)
+      // .andWhere('language_id', language_id)
+      .from('word')
+      .join('language', 'word.correct_count', '=', 'language.total_score')
+      .select(
+        'word.original as nextWord',
+        'word.correct_count as wordCorrectCount', 
+        'word.incorrect_count as wordIncorrectCount',
+        'language.total_score as totalScore'
+        )
+      .where(function() {
+        this.where('next', 2).andWhere('language_id', language_id)
+      })
+
+  }
+
   // populatelinkedList(language, words) {
   //   const ll = new LinkedList
     
