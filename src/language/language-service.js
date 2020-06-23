@@ -65,12 +65,8 @@ const LanguageService = {
   },
 
   getHeadOfList(db, language_id) {
+    let next = db('word').min('next').where({ language_id })
     return db
-    //get next = 2 of language_id = 1
-      // .from('word', 'language')
-      // .select('word.correct_count', 'word.incorrect_count', 'language.total_score')
-      // .where('next', 2)
-      // .andWhere('language_id', language_id)
       .from('word')
       .join('language', 'word.correct_count', '=', 'language.total_score')
       .select(
@@ -80,7 +76,7 @@ const LanguageService = {
         'language.total_score as totalScore'
         )
       .where(function() {
-        this.where('next', 2).andWhere('language_id', language_id)
+        this.where('next', next)
       })
 
   }
