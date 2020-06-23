@@ -47,12 +47,12 @@ languageRouter
   .get('/head', async (req, res, next) => {
     try {
       const words = await LanguageService.getHeadOfList(req.app.get('db'), req.language.id)
+      console.log(words, req.language.id)
       res.send(words[0])
     }
     catch(err) {
       next(err)
     }
-
   })
 
 languageRouter
