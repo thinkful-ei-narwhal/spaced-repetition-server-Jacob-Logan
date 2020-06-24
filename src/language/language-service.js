@@ -71,27 +71,27 @@ const LanguageService = {
       .join('language', 'word.id', '=', 'language.head')
       .select(
         'word.original as nextWord',
-        'word.correct_count as wordCorrectCount', 
+        'word.correct_count as wordCorrectCount',
         'word.incorrect_count as wordIncorrectCount',
         'language.total_score as totalScore'
       )
-      .where(function() {
-        this.where('language.id', language_id )
+      .where(function () {
+        this.where('language.id', language_id)
       })
   },
 
   updateHead(db, next, id) {
     return db
-    .from('language')
-    .update({ head: next })
-    .where({ id })
+      .from('language')
+      .update({ head: next })
+      .where({ id })
   },
 
   updateWord(db, nextWord, wordId) {
     return db
       .from('word')
       .where({ id: wordId })
-      .update({ next: nextWord})
+      .update({ next: nextWord })
   },
   getUpdatedList(db) {
     return db
@@ -110,7 +110,7 @@ const LanguageService = {
     ll.id = language.id;
     ll.name = language.name;
     ll.total_score = language.total_score;
-    // console.log('LangHead:',language.head);
+    // console.log('LangHead:', language.head);
     let word = words.find(w => w.id === language.head)
     ll.insertFirst({
       id: word.id,
@@ -134,38 +134,69 @@ const LanguageService = {
     // console.log(JSON.stringify(ll,null,2));
     return ll
   },
-  //TODO: it is creating a undefined node which is stopping the inserts
-  // why is is undefined?
-  // need a way to get the next value to be able to insert it 
-  insertNewLinkedList(db, ll) {
-    const langId = ll.id
-    return db
-      .from('word')
-      .where('language_id', langId)
-      .del()
-      .then((data) => {
-        let fieldsToInsert = ll.listNodes().map(node => {
-          let next;
-          if(node.next === null) {
-            next = null
-          }
-          else {
-            next = node.next.value.id
-          }
-          return ({
-            original: node.value.original,
-            translation: node.value.translation,
-            memory_value: node.value.memory_value,
-            correct_count: node.value.correct_count,
-            incorrect_count: node.value.incorrect_count,
-            language_id: langId,
-            next: next
-          })
-        })
-        return db.insert(fieldsToInsert).into('word')
-      })
-  }
 
+  updateDB(db, ll) {
+    // let updated = ll.listNodes().map(node => {
+    //     return ({
+    //       'memory_value': node.value.memory_value,
+    //       'correct_count': node.value.correct_count,
+    //       'incorrect_count': node.value.incorrect_count,
+    //       'next': (node.next) ? node.next.value.id : null
+    //     })
+    // })
+    console.log(ll.head.value.id)
+    return db.transaction(trx => 
+       Promise.all([
+        db('language')
+          .transacting(trx)
+          .where('id', ll.id)
+          .update({
+            total_score: ll.total_score,
+            head: ll.head.value.id}),
+          ...ll.forEach(node => {
+            return db('word')
+              .transacting(trx)
+              .where('id', node.value.id)
+              .update({
+                memory_value: node.value.memory_value,
+                correct_count: node.value.correct_count,
+                incorrect_count: node.value.incorrect_count,
+                next: (node.next) ? node.next.value.id : null
+              })
+          })
+      ])
+    )
+    //   updated.map(el => {
+    //     return db('word').where('id', el.id).update(el)
+    //     .catch((err) => {
+    //       console.log(err)  
+    //     })
+    // })
+  }
+    // updateDB( db, ll ){
+    //   return db.transaction(trx =>
+    //       Promise.all([
+    //         db('language')
+    //           .transacting(trx)
+    //           .where('id', ll.id)
+    //           .update({
+    //             total_score: ll.total_score,
+    //             head: ll.head.value.id,
+    //           }),
+    //         ...ll.forEach(node =>
+    //           db('word')
+    //             .transacting(trx)
+    //             .where('id', node.value.id)
+    //             .update({
+    //               memory_value: node.value.memory_value,
+    //               correct_count: node.value.correct_count,
+    //               incorrect_count: node.value.incorrect_count,
+    //               next: node.next ? node.next.value.id : null,
+    //             })
+    //         )
+    //       ])
+    //     )
+    // }
 }
 
 module.exports = LanguageService

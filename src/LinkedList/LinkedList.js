@@ -174,13 +174,11 @@ class _Node {
         return midCheck;
       }
     }
-    
-    moveHeadBy(level) {
-        let head = this.head;
+    moveHeadBy(memval) {
+        let current = this.head;
         this.head = this.head.next;
-        this.insertAt(level, head.value)
-       }
-
+        this.insertAt(current.value, memval)
+    }
     listNodes() {
         let node = this.head;
         const arr = [];
@@ -190,6 +188,16 @@ class _Node {
         }
         return arr;
        }
+
+    forEach(callback) {
+        let node = this.head
+        const arr = []
+        while(node) {
+            arr.push(callback(node))
+            node = node.next
+        }
+        return arr
+    }
   }
 
   module.exports = LinkedList

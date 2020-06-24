@@ -5,6 +5,7 @@ const jsonBodyParser = express.json()
 const languageRouter = express.Router()
 const LinkedList = require('../LinkedList/LinkedList')
 const { get } = require('../auth/auth-router')
+const { updateDB } = require('./language-service')
 languageRouter
   .use(requireAuth)
   .use(async (req, res, next) => {
@@ -54,7 +55,7 @@ languageRouter
       next(err)
     }
   })
-
+  // update service is updating the head wrong 
 languageRouter
   .route('/guess')
   .post(jsonBodyParser, async (req, res, next) => {
@@ -74,7 +75,6 @@ languageRouter
       const node = ll.head;
       const answer = node.value.translation
       const guess = req.body.guess
-      console.log('guess', req.body.guess, answer)
       if (guess === answer) {
         isCorrect = true
         ll.head.value.memory_value = Number(node.value.memory_value) * 2
@@ -86,10 +86,11 @@ languageRouter
         ll.head.value.incorrect_count = Number(ll.head.value.incorrect_count) + 1
       }
       ll.moveHeadBy(ll.head.value.memory_value)
-      await LanguageService.insertNewLinkedList(
+      await LanguageService.updateDB(
         req.app.get('db'),
         ll,
       )
+      console.log('ll', ll)
       res.json({
         nextWord: ll.head.value.original,
         wordCorrectCount: ll.head.value.correct_count,
@@ -98,10 +99,7 @@ languageRouter
         answer,
         isCorrect,
       })
-      }
-      //then listNodes and insert the values back into the database 
-     
-
+    }
     catch (error) {
       next(error)
     }
