@@ -145,7 +145,13 @@ const LanguageService = {
       .del()
       .then((data) => {
         let fieldsToInsert = ll.listNodes().map(node => {
-          console.log(node.next.value.id)
+          let next;
+          if(node.next === null) {
+            next = null
+          }
+          else {
+            next = node.next.value.id
+          }
           return ({
             original: node.value.original,
             translation: node.value.translation,
@@ -153,11 +159,8 @@ const LanguageService = {
             correct_count: node.value.correct_count,
             incorrect_count: node.value.incorrect_count,
             language_id: langId,
-            next: node.next.value.id
+            next: next
           })
-        })
-        fieldsToInsert = fieldsToInsert.filter(el => {
-          return el.original !== undefined
         })
         return db.insert(fieldsToInsert).into('word')
       })
