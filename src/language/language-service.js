@@ -1,3 +1,4 @@
+const LinkedList = require('../LinkedList/LinkedList')
 const LanguageService = {
   getUsersLanguage(db, user_id) {
     return db
@@ -65,26 +66,103 @@ const LanguageService = {
   },
 
   getHeadOfList(db, language_id) {
-    let next = db('word').min('next').where({ language_id })
     return db
       .from('word')
-      .join('language', 'word.correct_count', '=', 'language.total_score')
+      .join('language', 'word.id', '=', 'language.head')
       .select(
         'word.original as nextWord',
         'word.correct_count as wordCorrectCount', 
         'word.incorrect_count as wordIncorrectCount',
         'language.total_score as totalScore'
-        )
+      )
       .where(function() {
-        this.where('next', next)
+        this.where('language.id', language_id )
       })
+  },
 
+  updateHead(db, next, id) {
+    return db
+    .from('language')
+    .update({ head: next })
+    .where({ id })
+  },
+
+  updateWord(db, nextWord, wordId) {
+    return db
+      .from('word')
+      .where({ id: wordId })
+      .update({ next: nextWord})
+  },
+  getUpdatedList(db) {
+    return db
+      .from('word')
+      .join('language', 'word.id', '=', 'language.head')
+      .select(
+        'word.translation as answer',
+        'word.original as original',
+        'language.total_score as totalScore',
+        'word.correct_count as wordCorrectCount',
+        'word.incorrect_count as wordIncorrectCount',
+      )
+  },
+  populateLinkedList(language, words) {
+    const ll = new LinkedList();
+    ll.id = language.id;
+    ll.name = language.name;
+    ll.total_score = language.total_score;
+    // console.log('LangHead:',language.head);
+    let word = words.find(w => w.id === language.head)
+    ll.insertFirst({
+      id: word.id,
+      original: word.original,
+      translation: word.translation,
+      memory_value: word.memory_value,
+      correct_count: word.correct_count,
+      incorrect_count: word.incorrect_count,
+    })
+    while (word.next) {
+      word = words.find(w => w.id === word.next)
+      ll.insertLast({
+        id: word.id,
+        original: word.original,
+        translation: word.translation,
+        memory_value: word.memory_value,
+        correct_count: word.correct_count,
+        incorrect_count: word.incorrect_count,
+      })
+    }
+    // console.log(JSON.stringify(ll,null,2));
+    return ll
+  },
+  //TODO: it is creating a undefined node which is stopping the inserts
+  // why is is undefined?
+  // need a way to get the next value to be able to insert it 
+  insertNewLinkedList(db, ll) {
+    const langId = ll.id
+    return db
+      .from('word')
+      .where('language_id', langId)
+      .del()
+      .then((data) => {
+        let fieldsToInsert = ll.listNodes().map(node => {
+          console.log(node.next.value.id)
+          return ({
+            original: node.value.original,
+            translation: node.value.translation,
+            memory_value: node.value.memory_value,
+            correct_count: node.value.correct_count,
+            incorrect_count: node.value.incorrect_count,
+            language_id: langId,
+            next: node.next.value.id
+          })
+        })
+        fieldsToInsert = fieldsToInsert.filter(el => {
+          return el.original !== undefined
+        })
+        return db.insert(fieldsToInsert).into('word')
+      })
   }
 
-  // populatelinkedList(language, words) {
-  //   const ll = new LinkedList
-    
-  // }
 }
 
 module.exports = LanguageService
