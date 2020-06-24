@@ -71,27 +71,27 @@ const LanguageService = {
       .join('language', 'word.id', '=', 'language.head')
       .select(
         'word.original as nextWord',
-        'word.correct_count as wordCorrectCount', 
+        'word.correct_count as wordCorrectCount',
         'word.incorrect_count as wordIncorrectCount',
         'language.total_score as totalScore'
       )
-      .where(function() {
-        this.where('language.id', language_id )
+      .where(function () {
+        this.where('language.id', language_id)
       })
   },
 
   updateHead(db, next, id) {
     return db
-    .from('language')
-    .update({ head: next })
-    .where({ id })
+      .from('language')
+      .update({ head: next })
+      .where({ id })
   },
 
   updateWord(db, nextWord, wordId) {
     return db
       .from('word')
       .where({ id: wordId })
-      .update({ next: nextWord})
+      .update({ next: nextWord })
   },
   getUpdatedList(db) {
     return db
@@ -110,7 +110,7 @@ const LanguageService = {
     ll.id = language.id;
     ll.name = language.name;
     ll.total_score = language.total_score;
-    // console.log('LangHead:',language.head);
+    // console.log('LangHead:', language.head);
     let word = words.find(w => w.id === language.head)
     ll.insertFirst({
       id: word.id,
@@ -135,34 +135,63 @@ const LanguageService = {
     return ll
   },
   //TODO: it is creating a undefined node which is stopping the inserts
-  // why is is undefined?
-  // need a way to get the next value to be able to insert it 
-  insertNewLinkedList(db, ll) {
-    const langId = ll.id
-    return db
-      .from('word')
-      .where('language_id', langId)
-      .del()
-      .then((data) => {
-        let fieldsToInsert = ll.listNodes().map(node => {
-          console.log(node.next.value.id)
-          return ({
-            original: node.value.original,
-            translation: node.value.translation,
-            memory_value: node.value.memory_value,
-            correct_count: node.value.correct_count,
-            incorrect_count: node.value.incorrect_count,
-            language_id: langId,
-            next: node.next.value.id
-          })
-        })
-        fieldsToInsert = fieldsToInsert.filter(el => {
-          return el.original !== undefined
-        })
-        return db.insert(fieldsToInsert).into('word')
-      })
-  }
 
+  // insertNewLinkedList(db, ll) {
+  //   const langId = ll.id
+  //   // console.log('linkedlist', ll.printAllNodes())
+  //   return db
+  //     .from('word')
+  //     .where('language_id', langId)
+  //     // .del()
+  //     .then((data) => {
+  //       // console.log('linkedlist', ll)
+
+  //       let newfieldsToInsert = data.map(node => {
+  //         // console.log("node", node)
+  //         return ({
+  //           original: node.value.original,
+  //           translation: node.value.translation,
+  //           memory_value: node.value.memory_value,
+  //           correct_count: node.value.correct_count,
+  //           incorrect_count: node.value.incorrect_count,
+  //           language_id: langId,
+  //           next: node.next.value.id
+  //         })
+  //       })
+
+  //       console.log(newfieldsToInsert)
+  //       return db.insert(newfieldsToInsert).into('word')
+  //     })
+  // }
+  updateDB(db, ll) {
+    // return ll.listNodes()
+    const langId = ll.id
+
+    let updated = ll.listNodes().map(node => {
+      let next;
+      if (node.next === null) {
+        next = null;
+      }
+      else {
+        next = node.next.value.id;
+      }
+      return ({
+        original: node.value.original,
+        translation: node.value.translation,
+        memory_value: node.value.memory_value,
+        correct_count: node.value.correct_count,
+        incorrect_count: node.value.incorrect_count,
+        language_id: langId,
+        next: next
+      })
+    })
+    console.log('updated', updated)
+    //take each index in order and update each column wiht the new values
+    return db
+      .into('word')
+      .where('language_id', langId)
+      .update(updated)
+  }
 }
 
 module.exports = LanguageService

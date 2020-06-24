@@ -5,6 +5,7 @@ const jsonBodyParser = express.json()
 const languageRouter = express.Router()
 const LinkedList = require('../LinkedList/LinkedList')
 const { get } = require('../auth/auth-router')
+const { updateDB } = require('./language-service')
 languageRouter
   .use(requireAuth)
   .use(async (req, res, next) => {
@@ -86,7 +87,7 @@ languageRouter
         ll.head.value.incorrect_count = Number(ll.head.value.incorrect_count) + 1
       }
       ll.moveHeadBy(ll.head.value.memory_value)
-      await LanguageService.insertNewLinkedList(
+      await LanguageService.updateDB(
         req.app.get('db'),
         ll,
       )
@@ -98,9 +99,9 @@ languageRouter
         answer,
         isCorrect,
       })
-      }
-      //then listNodes and insert the values back into the database 
-     
+    }
+    //then listNodes and insert the values back into the database 
+
 
     catch (error) {
       next(error)
