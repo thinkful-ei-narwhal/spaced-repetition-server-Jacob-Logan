@@ -52,7 +52,6 @@ class _Node {
           return node;
         }
       }
-  
       return null;
     }
   
@@ -74,14 +73,37 @@ class _Node {
       node.next = new _Node(item, node.next);
     }
   
-    insertAt(item, index) {
-      let node = this.head;
-      for (let i = 1; i < index; i++) {
-        node = node.next;
+    // insertAt(item, index) {
+    //   let node = this.head;
+    //   for (let i = 1; i < index; i++) {
+    //       if(node.next !== null) {
+    //         node = node.next
+    //     }
+    //       else {
+    //         return
+    //     }
+    //   }
+    //   node.next = new _Node(item, node.next);
+    // }
+    insertAt(item, index){
+        let currNode = this.head;
+        // console.log('index', index)
+        // console.log('currnode', this.head)
+        if(currNode.next === null) {
+            this.insertLast(item)
+        }
+        if(index === 0) {
+            this.insertFirst(item)
+        }
+        let i = 1;
+        while(currNode.next !== null || i < index) {
+            currNode = currNode.next
+            i += 1
+            // console.log('i', i)
+        }
+        currNode.next = new _Node(item, currNode.next);
       }
-      node.next = new _Node(item, node.next);
-    }
-  
+
     printAllNodes() {
       let node = this.head;
       console.log("First node: ", this.head);
@@ -174,11 +196,17 @@ class _Node {
         return midCheck;
       }
     }
+
     moveHeadBy(memval) {
         let current = this.head;
-        this.head = this.head.next;
-        this.insertAt(current.value, memval)
+        if(this.head.next !== null) {
+            this.head = this.head.next;
+        }
+        // console.log('current', current)
+
+        this.insertAt(current, memval)
     }
+
     listNodes() {
         let node = this.head;
         const arr = [];

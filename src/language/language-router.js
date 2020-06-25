@@ -59,14 +59,12 @@ languageRouter
 languageRouter
   .route('/guess')
   .post(jsonBodyParser, async (req, res, next) => {
-
+    try {
     for (const [key, value] of Object.entries(req.body)) {
-      console.log('value', value)
-      if (value === null) {
+      if (value === null || value === '' || value === undefined || key !== 'guess') {
         return res.status(400).json({ error: `Missing 'guess' in request body` })
       }
     }
-    try {
       const words = await LanguageService.getLanguageWords(req.app.get('db'), req.language.id)
       //find the word with the id equivelant to the head
       const ll = LanguageService.populateLinkedList(req.language, words)
@@ -85,12 +83,12 @@ languageRouter
         ll.head.value.memory_value = 1
         ll.head.value.incorrect_count = Number(ll.head.value.incorrect_count) + 1
       }
+      console.log(ll)
       ll.moveHeadBy(ll.head.value.memory_value)
       await LanguageService.updateDB(
         req.app.get('db'),
         ll,
       )
-      console.log('ll', ll)
       res.json({
         nextWord: ll.head.value.original,
         wordCorrectCount: ll.head.value.correct_count,
