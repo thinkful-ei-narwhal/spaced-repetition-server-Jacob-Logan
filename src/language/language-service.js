@@ -120,7 +120,7 @@ const LanguageService = {
       correct_count: word.correct_count,
       incorrect_count: word.incorrect_count,
     })
-    while (word.next) {
+    while (word.next !== null) {
       word = words.find(w => w.id === word.next)
       ll.insertLast({
         id: word.id,
@@ -144,26 +144,27 @@ const LanguageService = {
     //       'next': (node.next) ? node.next.value.id : null
     //     })
     // })
-    console.log(ll.head.value.id)
-    return db.transaction(trx => 
-       Promise.all([
+    console.log('LL head ID value:', ll.head.value.id)
+    return db.transaction(trx =>
+      Promise.all([
         db('language')
           .transacting(trx)
           .where('id', ll.id)
           .update({
             total_score: ll.total_score,
-            head: ll.head.value.id}),
-          ...ll.forEach(node => {
-            return db('word')
-              .transacting(trx)
-              .where('id', node.value.id)
-              .update({
-                memory_value: node.value.memory_value,
-                correct_count: node.value.correct_count,
-                incorrect_count: node.value.incorrect_count,
-                next: (node.next) ? node.next.value.id : null
-              })
-          })
+            head: ll.head.value.id
+          }),
+        ...ll.forEach(node => {
+          return db('word')
+            .transacting(trx)
+            .where('id', node.value.id)
+            .update({
+              memory_value: node.value.memory_value,
+              correct_count: node.value.correct_count,
+              incorrect_count: node.value.incorrect_count,
+              next: (node.next) ? node.next.value.id : null
+            })
+        })
       ])
     )
     //   updated.map(el => {
@@ -173,30 +174,30 @@ const LanguageService = {
     //     })
     // })
   }
-    // updateDB( db, ll ){
-    //   return db.transaction(trx =>
-    //       Promise.all([
-    //         db('language')
-    //           .transacting(trx)
-    //           .where('id', ll.id)
-    //           .update({
-    //             total_score: ll.total_score,
-    //             head: ll.head.value.id,
-    //           }),
-    //         ...ll.forEach(node =>
-    //           db('word')
-    //             .transacting(trx)
-    //             .where('id', node.value.id)
-    //             .update({
-    //               memory_value: node.value.memory_value,
-    //               correct_count: node.value.correct_count,
-    //               incorrect_count: node.value.incorrect_count,
-    //               next: node.next ? node.next.value.id : null,
-    //             })
-    //         )
-    //       ])
-    //     )
-    // }
+  // updateDB( db, ll ){
+  //   return db.transaction(trx =>
+  //       Promise.all([
+  //         db('language')
+  //           .transacting(trx)
+  //           .where('id', ll.id)
+  //           .update({
+  //             total_score: ll.total_score,
+  //             head: ll.head.value.id,
+  //           }),
+  //         ...ll.forEach(node =>
+  //           db('word')
+  //             .transacting(trx)
+  //             .where('id', node.value.id)
+  //             .update({
+  //               memory_value: node.value.memory_value,
+  //               correct_count: node.value.correct_count,
+  //               incorrect_count: node.value.incorrect_count,
+  //               next: node.next ? node.next.value.id : null,
+  //             })
+  //         )
+  //       ])
+  //     )
+  // }
 }
 
 module.exports = LanguageService
